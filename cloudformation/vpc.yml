@@ -1,0 +1,191 @@
+Parameters:
+
+  NetSecDevVPCCIDR:
+    Description: The NetSecDev VPC CIDR
+    Type: String
+  NetSecDevVPCTag:
+    Description: The NetSecDev VPC tag
+    Type: String
+  NetSecDevAZ:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Default: "us-west-2a"
+  NetSecDevPublicNetTag:
+    Description: The public subnet tag
+    Type: String
+  NetSecDevPrivateNetTag:
+    Description: The private subnet tag
+    Type: String
+  NetSecDevPublicNetCIDR:
+    Description: The public subnet CIDR tag
+    Type: String
+  NetSecDevPrivateNetCIDR:
+    Description: The private subnet CIDR tag
+    Type: String
+  NetSecDevPublicRTTag:
+    Description: The public route table tag
+    Type: String
+  NetSecDevPrivateRTTag:
+    Description: The private route table tag
+    Type: String
+
+
+Resources:
+
+  NetSecDevVPC:
+    Type: "AWS::EC2::VPC"
+    Properties: 
+      CidrBlock:
+        Ref: NetSecDevVPCCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: "Name"
+          Value:
+            Ref: NetSecDevVPCTag
+
+  NetSecDevIGW:
+    Type: "AWS::EC2::InternetGateway"
+
+  NetSecDevAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref NetSecDevVPC
+      InternetGatewayId: !Ref NetSecDevIGW
+
+  NetSecDevPublicNet:
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      CidrBlock:
+        Ref: NetSecDevPublicNetCIDR
+      MapPublicIpOnLaunch: false
+      VpcId:
+        Ref: NetSecDevVPC
+      AvailabilityZone: !Select [ "0", !Ref NetSecDevAZ ]
+      Tags:
+        - Key: "Name"
+          Value:
+            Ref: NetSecDevPublicNetTag
+
+  NetSecDevPrivateNet:
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      CidrBlock:
+        Ref: NetSecDevPrivateNetCIDR
+      MapPublicIpOnLaunch: false
+      VpcId:
+        Ref: NetSecDevVPC
+      AvailabilityZone: !Select [ "0", !Ref NetSecDevAZ ]
+      Tags:
+        - Key: "Name"
+          Value:
+            Ref: NetSecDevPrivateNetTag
+
+  NetSecDevPublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref NetSecDevVPC
+      Tags:
+        - Key: "Name"
+          Value:
+            Ref: NetSecDevPublicRTTag
+
+  NetSecDevPrivateRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref NetSecDevVPC
+      Tags:
+        - Key: "Name"
+          Value:
+            Ref: NetSecDevPrivateRTTag
+
+  NetSecDevPublicNetRTA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref NetSecDevPublicNet
+      RouteTableId: !Ref NetSecDevPublicRT
+
+  NetSecDevPrivateNetRTA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref NetSecDevPrivateNet
+      RouteTableId: !Ref NetSecDevPrivateRT
+
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Bastion instances egress SG"
+      VpcId: !Ref NetSecDevVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"
+
+  ClientSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Client instances ingress SG"
+      VpcId: !Ref NetSecDevVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSG
+
+Outputs:
+
+  NetSecDevVPCID:
+    Description: NetSecDev VPC ID
+    Value:
+      Ref: NetSecDevVPC
+    Export:
+      Name: !Sub "Dev-NetSecDevVPC-ID"
+
+  NetSecDevIGWID:
+    Description: NetSecDev IGW ID
+    Value:
+      Ref: NetSecDevIGW
+    Export:
+      Name: !Sub "Dev-NetSecDev-IGW-ID"
+
+  NetSecDevPublicNet:
+    Description: Public Subnet ID
+    Value:
+      Ref: NetSecDevPublicNet
+    Export:
+      Name: !Sub "Dev-NetSecDevVPC-Public-Subnet-ID"
+
+  NetSecDevPrivateNet:
+    Description: Private Subnet ID
+    Value:
+      Ref: NetSecDevPrivateNet
+    Export:
+      Name: !Sub "Dev-NetSecDevVPC-Private-Subnet-ID"
+
+  NetSecDevPrivateRT:
+    Description: Private Route Table ID
+    Value:
+      Ref: NetSecDevPrivateRT
+    Export:
+      Name: !Sub "Dev-NetSecDevVPC-PrivateRT-ID"
+
+  NetSecDevPublicRT:
+    Description: Public Route Table ID
+    Value:
+      Ref: NetSecDevPublicRT
+    Export:
+      Name: !Sub "Dev-NetSecDevVPC-PublicRT-ID"
+
+  BastionSG:
+    Description: Bastion SG ID
+    Value:
+      Ref: BastionSG
+    Export:
+      Name: !Sub "Dev-NetSecDev-BastionSG"
+
+  ClientSG:
+    Description: Client SG ID
+    Value:
+      Ref: ClientSG
+    Export:
+      Name: !Sub "Dev-NetSecDev-ClientSG"

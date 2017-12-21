@@ -1,0 +1,53 @@
+---
+region: us-west-2
+state: present
+
+EISAccountID: 656532927350
+EISAccountARN: "arn:aws:sns:{{ region }}:{{ EISAccountID }}:*"
+
+sqs_stack_name: nsmsqs
+NSMSQSName: nsmglobalsqs
+mozdefusername: "mozdef"
+mozdefaccountid: "{{ EISAccountID }}"
+MozDefARN: "arn:aws:iam::{{ mozdefaccountid }}:user/{{ mozdefusername }}"
+NSMSQSURL: "https://sqs.{{ region }}.amazonaws.com/{{ EISAccountID }}/{{ NSMSQSName }}"
+NSMSQSARN: "arn:aws:sqs:{{ region }}:{{ EISAccountID }}:{{ NSMSQSName }}"
+
+sns_stack_name: nsmsns
+SNSDisplayName: "NSM SNS Topic"
+SNSTopicName: nsmsns
+SenderAccountID: 656532927350
+SNSARN: "arn:aws:sns:{{ region }}:{{ SenderAccountID }}:{{ SNSTopicName }}"
+
+role_stack_name: sendtomzodefrole
+SendToMozDef: "SendToMozDef"
+
+netsecdevvpc_stack_name: netsecdevvpc
+NetSecDevVPCCIDR: "10.99.0.0/16"
+NetSecDevVPCTag: "netsecdev-vpc"
+NetSecDevPublicNetTag: "netsecdev-public"
+NetSecDevPrivateNetTag: "netsecdev-private"
+NetSecDevPublicNetCIDR: "10.99.1.0/24"
+NetSecDevPrivateNetCIDR: "10.99.2.0/24"
+NetSecDevPublicRTTag: "netsecdev-public"
+NetSecDevPrivateRTTag: "netsecdev-private"
+
+netsecdevec2_stack_name: netsecdevec2clients
+SSHKeyName: "mpurzynski-infosecdev2"
+NATInstanceType: "m4.large"
+NatAZ: "{{ region }}a"
+
+netsecdevnat_stack_name: netsecdevnat
+
+netsecdevbastion_stack_name: netsecdevbastion
+BastionInstanceType: "m4.large"
+BastionAZ: "{{ NatAZ }}"
+
+dns_stack_name: netsecdevdns
+
+NetSecDevDomain: "netsecdev.security.allizom.org"
+PublicZoneID: "Z13VQZ50081YZU"
+PublicZoneDomain: "security.allizom.org"
+
+ClientInstanceType: "m4.large"
+ClientAZ: "{{ NatAZ }}"

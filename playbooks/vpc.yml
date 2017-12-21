@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the VPC
+    action: cloudformation
+      stack_name="{{ netsecdevvpc_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/vpc.yml"
+    args:
+      template_parameters:
+        NetSecDevVPCCIDR: "{{ NetSecDevVPCCIDR }}"
+        NetSecDevVPCTag: "{{ NetSecDevVPCTag }}"
+        NetSecDevPublicNetTag: "{{ NetSecDevPublicNetTag }}"
+        NetSecDevPrivateNetTag: "{{ NetSecDevPrivateNetTag }}"
+        NetSecDevPublicNetCIDR: "{{ NetSecDevPublicNetCIDR }}"
+        NetSecDevPrivateNetCIDR: "{{ NetSecDevPrivateNetCIDR }}"
+        NetSecDevPublicRTTag: "{{ NetSecDevPublicRTTag }}"
+        NetSecDevPrivateRTTag: "{{ NetSecDevPrivateRTTag }}"

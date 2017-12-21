@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create some clients to show off
+    action: cloudformation
+      stack_name="{{ netsecdevec2_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/ec2.yml"
+    args:
+      template_parameters:
+        SSHKeyName: "{{ SSHKeyName }}"
+        ClientInstanceType: "{{ ClientInstanceType }}"
+        ClientAZ: "{{ ClientAZ }}"
+        NetSecDevDomain: "{{ NetSecDevDomain }}"

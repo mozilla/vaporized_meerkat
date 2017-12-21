@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create a set of roles to be used by VM
+    action: cloudformation
+      stack_name="{{ role_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/role.yml"
+    args:
+      template_parameters:
+        SNSARN: "{{ SNSARN }}"
+        EISAccountARN: "{{ EISAccountARN }}"
+        SendToMozDef: "{{ SendToMozDef }}"

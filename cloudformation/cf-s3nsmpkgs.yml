@@ -1,0 +1,31 @@
+Parameters:
+  s3name:
+    Description: Name of the S3 bucket for packages storage
+    Type: String
+    Default: "nsmpkgs"
+
+Resources:
+
+  NSMPkgsS3:
+    Type: "AWS::S3::Bucket"
+    Properties: 
+      BucketName: !Ref s3name
+#    LoggingConfiguration:
+#    NotificationConfiguration:
+#  VersioningConfiguration:
+
+  NSMPkgsS3Policy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref s3name
+      PolicyDocument:
+        Statement:
+        - Sid: PutAccessForNSMBuild
+          Action:
+          - s3:PutObject
+          - s3:PutObjectAcl
+          Effect: Allow
+          Resource: "arn:aws:s3:::nsmpkgs/*"
+#          Resource: !Join [ "", [ "arn:aws:s3:::",!Ref s3name,"/*" ]]
+          Principal:
+            AWS: arn:aws:iam::656532927350:root

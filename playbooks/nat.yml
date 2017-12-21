@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the NAT instance (with Suricata inside!!)
+    action: cloudformation
+      stack_name="{{ netsecdevnat_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/nat.yml"
+    args:
+      template_parameters:
+        SSHKeyName: "{{ SSHKeyName }}"
+        NATInstanceType: "{{ NATInstanceType }}"
+        NatAZ: "{{ NatAZ }}"
+        NetSecDevDomain: "{{ NetSecDevDomain }}"
+        SendToMozDef: "{{ SendToMozDef }}"

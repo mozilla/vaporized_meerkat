@@ -1,0 +1,118 @@
+---
+- include_vars: aws.yml
+
+- name: Create group suricata
+  group: name=suricata
+  register: suriuser
+
+- name: Create user suricata
+  user: name=suricata group=suricata shell="/bin/bash"
+  register: suriuser
+
+- name: Create necessary Suricata directories
+  when: suriuser|success
+  file: path={{ item }} state=directory owner=suricata group=suricata mode=0755
+  with_items: "{{ suricata_dirs }}"
+  register: suridirs
+
+- name: Install necessary packages
+  apt: pkg={{ item }} state=installed
+  with_items: "{{ suricata_pkgs_to_install }}"
+
+- name: Fetch Hyperscan and Suricata from S3
+  s3: 
+    bucket: "{{ s3pkgsbucket }}"
+    object: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: get
+  with_items: "{{ s3pkgs }}"
+
+- name: Install Hyperscan and Suricata packages
+  apt:
+    deb: "/tmp/{{ item }}"
+  with_items: "{{ s3pkgs }}"
+
+- name: Create suricata.yaml
+  when: suridirs|success
+  template: src=suricata.j2 dest={{ nsm_config_dir }}/suricata.yaml owner=suricata group=suricata mode=0600 backup=yes
+
+- name: Copy startup scripts - office version
+  when: (suridirs|success and nsm_role_offices is defined)
+  template: src=start_afpacket_suricata.sh dest=/usr/local/sbin/start_afpacket_suricata.sh owner=suricata group=suricata mode=0755
+
+- name: Copy the supervisor configuration file for Suricata on AF_PACKET
+  when: nsm_role_offices is defined
+  template: src=suricataafpacketsupervisord.conf dest=/etc/supervisor/conf.d/suricataafpacketsupervisord.conf owner=root group=root mode=0644
+
+- name: Copy various Suricata support files
+  when: suridirs|success
+  copy: src={{ item }} dest={{ nsm_config_dir }}/{{ item }} owner=suricata group=suricata mode=0755
+  with_items: "{{ suricata_misc_files }}"
+  register: surimiscfiles
+
+- name: Deploy common signatures
+  when: suridirs|success
+  copy: src=rules/{{ item }} dest={{ nsm_config_dir }}/rules/{{ item }} owner=suricata group=suricata mode=0755
+  with_items: "{{ suricata_rules }}"
+  tags: rules
+
+- name: Copy various shell and python scripts
+  when: suridirs|success
+  copy: src={{ item }} dest={{ nsm_scripts_path }}/{{ item }} owner=root group=root mode=0755
+  with_items: "{{ nsm_scripts_list }}"
+  register: suriscripts
+
+- name: Copy the pulledpork configuration
+  when: suridirs|success
+  template: src=pulledpork.j2 dest={{ nsm_config_dir }}/pulledpork/pulledpork.conf owner=suricata group=suricata mode=0755
+
+- name: Copy the remaining pulledpork configuration files
+  when: suridirs|success
+  copy: src=pulledpork/{{ item }} dest={{ nsm_config_dir }}/pulledpork/{{ item }} owner=suricata group=suricata mode=0755
+  with_items: "{{ pp_conf }}"
+
+- name: Create idsrulesupdate cron job
+  cron: name="idsrulesupdate" job="{{ nsm_scripts_path }}/idsrulesupdate.sh >> /var/log/nsm/idsrulesupdate.log 2>&1" hour="04" minute="18" cron_file="idsrulesupdate" user="suricata"
+
+- name: Set necessary capabilities for the Suricata binary
+  capabilities: path=/opt/suricata/bin/suricata capability=cap_net_raw+eip state=present
+
+- name: Grant suricata user permissions to the NSM log directory
+  acl: name=/var/log/nsm entity=suricata etype=user permissions="rwx" state=present
+
+- name: Ensure cron is running
+  service: name=cron state=started
+
+- name: Make sure logs files have a correct owner
+  file: path={{ item }} owner=suricata group=suricata mode=0644 state=touch
+  with_items: "{{ suricata_log_files }}"
+
+- name: Copy ld.so.conf.d/hyperscan.conf
+  copy: src=hyperscan.conf dest=/etc/ld.so.conf.d/hyperscan.conf owner=root group=root mode=0600
+
+- name: Update the ldconfig cache
+  command: /sbin/ldconfig
+
+- name: Create suricatadailyrestartcron cron job
+  cron: name="suricatadailyrestartcron" job="/usr/bin/supervisorctl restart suricatamyricomsupervisord >> /var/log/nsm/suricatadailyrestartcron.log 2>&1" hour="04" minute="34" cron_file="suricatadailyrestartcron" user="root"
+
+- name: Create the sniffing service
+  copy: src=snifferinterface.service dest=/etc/systemd/system/snifferinterface.service owner=root group=root mode=0644
+
+- name: Create the Suricata service
+  template: src=suricata.service.j2 dest=/etc/systemd/system/suricata.service owner=root group=root mode=0644
+
+- name: Enable and start the sniffing service
+  systemd: name=snifferinterface state=started enabled=True
+
+- name: Enable and start the Suricata service
+  systemd: name=suricata state=started enabled=True
+
+#- name: Copy the del_old_pcaps service description
+#  copy: src=del_old_pcaps.service dest=/etc/systemd/system/del_old_pcaps.service owner=root group=root mode=0644
+
+#- name: Copy the del_old_pcaps timer description
+#  copy: src=del_old_pcaps.timer dest=/etc/systemd/system/del_old_pcaps.timer owner=root group=root mode=0644
+
+- name: Reload the systemd
+  command: systemctl daemon-reload

@@ -1,0 +1,63 @@
+Parameters:
+  SNSDisplayName:
+    Description: The SNS display name
+    Type: String
+  SNSTopicName:
+    Description: The SNS topic name
+    Type: String
+  SNSARN:
+    Description: The SNS ARN
+    Type: String
+  EISAccountID:
+    Description: The EIS account ID
+    Type: String
+  NSMSQSARN:
+    Description: The destination SQS ARN
+    Type: String
+
+
+Resources:
+
+# One per foreign account
+  nsmsnssub:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint:
+        Ref: NSMSQSARN
+      Protocol: SQS
+      TopicArn:
+        Ref: SNSARN
+
+# One per foreign account
+# NSM-NAT instance sends logs here
+  nsmsnstopic:
+    Type: "AWS::SNS::Topic"
+    Properties: 
+      DisplayName:
+        Ref: SNSDisplayName
+      TopicName:
+        Ref: SNSTopicName
+      Subscription:
+        -
+          Endpoint:
+            Ref: NSMSQSARN
+          Protocol: "sqs"
+
+# One per foreign account
+# Grants the Infosec SQS permissions to subscribe to this topic
+  nsmsnspolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: NSMSNSTopicPolicy
+        Statement:
+        - Sid: S1
+          Effect: Allow
+          Principal:
+            # Change to the EIS account ID
+            AWS:
+              Ref: EISAccountID
+          Action: sns:Subscribe
+          Resource: "*"
+      Topics:
+      - Ref: nsmsnstopic

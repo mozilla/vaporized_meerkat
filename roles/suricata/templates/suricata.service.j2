@@ -1,0 +1,16 @@
+[Unit]
+Description=Suricata
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/suricata/bin/suricata -c /etc/nsm/suricata.yaml --af-packet
+User=suricata
+Group=suricata
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=suricata
+
+[Install]
+WantedBy=multi-user.target

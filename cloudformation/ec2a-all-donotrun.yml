@@ -1,0 +1,205 @@
+  SSHKeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  NATInstanceType:
+    Type: String
+    Default: "m4.large"
+    AllowedValues:
+      - "t2.micro"
+      - "m1.small"
+      - "m4.large"
+    Description: Enter t2.micro, m1.small or m4.large. Default is m4.large.
+  NatAZ:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Default: "us-west-2a"
+
+
+Resources:
+
+  clientsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Client instances ingress SG"
+      VpcId: !Ref netsecdevvpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        SourceSecurityGroupId: !Ref bastionsg
+
+  bastionsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Bastion instances egress SG"
+      VpcId: !Ref netsecdevvpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"
+
+  bastionvm:
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref instancetypeparam
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref sshkeynameparam
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "NAT instance public int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref bastionsg
+          SubnetId: !Ref netsecdevpublicnet
+          AssociatePublicIpAddress: true
+      SourceDestCheck: true
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-bastion"
+
+  client0vm:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref availabilityzoneparam ]
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref instancetypeparam
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref sshkeynameparam
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref clientsg
+          SubnetId: !Ref netsecdevprivatenet
+      SourceDestCheck: true
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client0"
+
+  client1vm:
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      AvailabilityZone: !Select [ "0", !Ref availabilityzoneparam ]
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref instancetypeparam
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref sshkeynameparam
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client1 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref clientsg
+          SubnetId: !Ref netsecdevprivatenet
+      SourceDestCheck: true
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  NSMBuildRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+  NSMBuildRolePolicies:
+    Type: "AWS::IAM::Policy"
+    Properties: 
+      PolicyName: "NSMBuildRolePolicies"
+      PolicyDocument: 
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action: "s3:PutObject"
+            Resource: "arn:aws:s3:::infosec-public-data/*"
+          - 
+            Effect: "Allow"
+            Action: "s3:PutObjectAcl"
+            Resource: "arn:aws:s3:::infosec-public-data/*"
+      Roles: 
+        - 
+          Ref: "NSMBuildRole"
+  NSMBuildInstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - 
+          Ref: "NSMBuildRole"
+
+  nsmbuildsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "NSM build instance ingress SG"
+      VpcId: !Ref netsecdevvpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        SourceSecurityGroupId: !Ref bastionsg
+
+  nsmbuildvm:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref availabilityzoneparam ]
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref instancetypeparam
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref sshkeynameparam
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref clientsg
+          SubnetId: !Ref netsecdevprivatenet
+      SourceDestCheck: true
+      Tags:
+        - Key: "Name"
+          Value: "nsmbuild"
+      IamInstanceProfile: !Ref NSMBuildInstanceProfile

@@ -1,0 +1,70 @@
+Parameters:
+  SNSARN:
+    Description: The SNS ARN
+    Type: String
+  EISAccountARN:
+    Description: The EIS account start object ARN
+    Type: String
+  SendToMozDef:
+    Description: The SendToMozDef role name
+    Type: String
+
+Resources:
+
+  SendToMozDefRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      RoleName:
+        Ref: SendToMozDef
+      AssumeRolePolicyDocument: 
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+
+  DummyRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      RoleName: "DummyRole"
+      AssumeRolePolicyDocument: 
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+
+  SendToMozDefRolePolicies:
+    Type: "AWS::IAM::Policy"
+    Properties: 
+      PolicyName: "SendToMozDefRolePolicies"
+      PolicyDocument: 
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action: SNS:Publish
+            Resource:
+              Ref: SNSARN
+          - 
+            Effect: "Allow"
+            Action: SNS:ListTopics
+            Resource:
+              Ref: EISAccountARN
+          -
+            Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+            Resource: "arn:aws:dynamodb:*:*:table/credential-store"
+      Roles: 
+        - 
+          Ref: "SendToMozDefRole"
