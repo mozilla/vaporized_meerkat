@@ -1,0 +1,238 @@
+Parameters:
+
+  SSHKeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  ClientInstanceType:
+    Type: String
+    Default: "m4.large"
+    AllowedValues:
+      - "t2.micro"
+      - "m1.small"
+      - "m4.large"
+    Description: Enter t2.micro, m1.small or m4.large. Default is m4.large.
+  ClientAZ:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Default: "us-west-2a"
+  NetSecDevDomain:
+    Type: String
+
+
+Resources:
+
+  ClientInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - DummyRole
+
+  Client0VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client0"
+
+  Client1VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-f318de8b"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  Client2VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-862debfe"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  Client3VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-4e13d536"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  Client4VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-343ef84c"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  Client5VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-cd1adcb5"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"
+
+  Client6VM:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      AvailabilityZone: !Select [ "0", !Ref ClientAZ ]
+      ImageId: "ami-6305c31b"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref ClientInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "40"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeleteOnTermination: true
+          Description: "Client0 private int"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue Dev-NetSecDev-ClientSG
+          SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+      SourceDestCheck: true
+      IamInstanceProfile: !Ref ClientInstanceProfile
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-client1"

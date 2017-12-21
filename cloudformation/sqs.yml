@@ -1,0 +1,56 @@
+Parameters:
+  NSMSQSName:
+    Description: The SQS queue name
+    Type: String
+  NSMSQSURL:
+    Description: The SQS queue URL
+    Type: String
+  NSMSQSARN:
+    Description: The SNS ARN
+    Type: String
+  MozDefARN:
+    Description: The MozDef user name that will read from the SQS queue
+    Type: String
+
+Resources:
+
+# A global one in the infosec account
+# All SNS send notifications here
+  nsmsqs:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      MaximumMessageSize: 262144
+      QueueName:
+        Ref: NSMSQSName
+
+# Grants the SNS permission to send messages to this queue
+# Grants MozDef in SCL3 permissions to read messages from the SQS
+  nsmsqspolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Id: NSMSQSTopicPolicy2
+        Statement:
+        - Sid: S1
+          Effect: Allow
+          Principal:
+            AWS: "*"
+          Action:
+          - SQS:SendMessage
+          Resource: "*"
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                Fn::GetAtt: 
+                  - "nsmsqs"
+                  - "Arn"
+        - Sid: S2
+          Effect: Allow
+          Principal:
+            AWS:
+              Ref: MozDefARN
+          Action:
+          - SQS:*
+          Resource: "*"
+      Queues:
+      - Ref: nsmsqs

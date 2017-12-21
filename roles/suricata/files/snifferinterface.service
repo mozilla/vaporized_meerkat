@@ -1,0 +1,35 @@
+[Unit]
+Description=Configure sniffing interfaces
+Before=suricata.service
+Wants=network.target
+
+[Service]
+Type=oneshot
+
+ExecStart=/sbin/ip link set ens4 up
+
+ExecStartPost=/sbin/ethtool -G ens4 rx 32768
+ExecStartPost=/sbin/ethtool -K ens4 rx off
+ExecStartPost=/sbin/ethtool -K ens4 tx off
+ExecStartPost=/sbin/ethtool -K ens4 autoneg off
+ExecStartPost=/sbin/ethtool -K ens4 tso off
+ExecStartPost=/sbin/ethtool -K ens4 ufo off
+ExecStartPost=/sbin/ethtool -K ens4 gso off
+ExecStartPost=/sbin/ethtool -K ens4 gro off
+ExecStartPost=/sbin/ethtool -K ens4 lro off
+ExecStartPost=/sbin/ethtool -K ens4 tx­nocache­copy off
+ExecStartPost=/sbin/ethtool -K ens4 rxhash off
+ExecStartPost=/sbin/ethtool -K ens4 ntuple off
+ExecStartPost=/sbin/ethtool -K ens4 sg off
+ExecStartPost=/sbin/dhclient ens4
+ExecStartPost=/sbin/sysctl -w net.ipv4.conf.all.forwarding=1
+ExecStartPost=/sbin/iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
+
+ExecStop=/sbin/ip link set ens4 promisc off arp off down
+
+RemainAfterExit=yes
+
+SuccessExitStatus=1
+
+[Install]
+WantedBy=multi-user.target

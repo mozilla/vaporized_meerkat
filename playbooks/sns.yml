@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the per-account SNS topic that will be polled by SQS
+    action: cloudformation
+      stack_name="{{ sns_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/sns.yml"
+    args:
+      template_parameters:
+        SNSDisplayName: "{{ SNSDisplayName }}"
+        SNSTopicName: "{{ SNSTopicName }}"
+        SNSARN: "{{ SNSARN }}"
+        EISAccountID: "{{ EISAccountID }}"
+        NSMSQSARN: "{{ NSMSQSARN }}"
+

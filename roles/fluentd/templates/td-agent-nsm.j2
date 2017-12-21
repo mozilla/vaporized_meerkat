@@ -1,0 +1,808 @@
+<source>
+  @type tail
+  path /nsm/bro/logs/current/conn.log
+  pos_file /nsm/bro/logs/fluentd/conn.pos
+  tag bro.conn
+  format json
+  time_key ts
+  keep_time_key true
+  refresh_interval 5
+</source>
+
+<filter bro.conn>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source conn
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/dce_rpc.log
+  pos_file /nsm/bro/logs/fluentd/dce_rpc.pos
+  tag bro.dcerpc
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.dcerpc>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source dcerpc
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/dhcp.log
+  pos_file /nsm/bro/logs/fluentd/dhcp.pos
+  tag bro.dhcp
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.dhcp>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source dhcp
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/dns.log
+  pos_file /nsm/bro/logs/fluentd/dns.pos
+  tag bro.dns
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.dns>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source dns
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/files.log
+  pos_file /nsm/bro/logs/fluentd/files.pos
+  tag bro.files
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.files>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source files
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/ftp.log
+  pos_file /nsm/bro/logs/fluentd/ftp.pos
+  tag bro.ftp
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.ftp>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source ftp
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/http.log
+  pos_file /nsm/bro/logs/fluentd/http.pos
+  tag bro.http
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.http>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source http
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/intel.log
+  pos_file /nsm/bro/logs/fluentd/intel.pos
+  tag bro.intel
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.intel>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc,seen.node,seen.where,seen.indicator
+  <record>
+    hostname "#{Socket.gethostname}"
+    source intel
+    tags nsm
+    customendpoint " "
+    category bro
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    seenindicator ${record["seen.indicator"]}
+    seennode ${record["seen.node"]}
+    seenwhere ${record["seen.where"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/irc.log
+  pos_file /nsm/bro/logs/fluentd/irc.pos
+  tag bro.irc
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.irc>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source irc
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/kerberos.log
+  pos_file /nsm/bro/logs/fluentd/kerberos.pos
+  tag bro.kerberos
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.kerberos>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source kerberos
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/known_certs.log
+  pos_file /nsm/bro/logs/fluentd/known_certs.pos
+  tag bro.knowncerts
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.knowncerts>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source knowncerts
+    tags nsm
+    category bro
+    customendpoint " "
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/known_devices.log
+  pos_file /nsm/bro/logs/fluentd/known_devices.pos
+  tag bro.knowndevices
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.knowndevices>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source knowndevices
+    tags nsm
+    customendpoint " "
+    category bro
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/known_hosts.log
+  pos_file /nsm/bro/logs/fluentd/known_hosts.pos
+  tag bro.knownhosts
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.knownhosts>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source knownhosts
+    tags nsm
+    customendpoint " "
+    category bro
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/known_services.log
+  pos_file /nsm/bro/logs/fluentd/known_services.pos
+  tag bro.knownservices
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.knownservices>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source knownservices
+    tags nsm
+    category bro
+    customendpoint " "
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/notice.log
+  pos_file /nsm/bro/logs/fluentd/notice.pos
+  tag bro.notice
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.notice>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source notice
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/ntlm.log
+  pos_file /nsm/bro/logs/fluentd/ntlm.pos
+  tag bro.ntlm
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.ntlm>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc,username,hostname,domainname
+  <record>
+    hostname "#{Socket.gethostname}"
+    source ntlm
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    ntlmusername ${record["username"]}
+    ntlmhostname ${record["hostname"]}
+    ntlmdomainname ${record["domainname"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/pe.log
+  pos_file /nsm/bro/logs/fluentd/pe.pos
+  tag bro.pe
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.pe>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source pe
+    tags nsm
+    category bro
+    customendpoint " "
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/sip.log
+  pos_file /nsm/bro/logs/fluentd/sip.pos
+  tag bro.sip
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.sip>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source sip
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/smb_files.log
+  pos_file /nsm/bro/logs/fluentd/smb_files.pos
+  tag bro.smbfiles
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.smbfiles>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source smbfiles
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/smb_mapping.log
+  pos_file /nsm/bro/logs/fluentd/smb_mapping.pos
+  tag bro.smbmapping
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.smbmapping>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source smbmapping
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/smtp.log
+  pos_file /nsm/bro/logs/fluentd/smtp.pos
+  tag bro.smtp
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.smtp>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source smtp
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/snmp.log
+  pos_file /nsm/bro/logs/fluentd/snmp.pos
+  tag bro.snmp
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.snmp>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source snmp
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/software.log
+  pos_file /nsm/bro/logs/fluentd/software.pos
+  tag bro.software
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.software>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source software
+    tags nsm
+    category bro
+    customendpoint " "
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/ssh.log
+  pos_file /nsm/bro/logs/fluentd/ssh.pos
+  tag bro.ssh
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.ssh>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source ssh
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/ssl.log
+  pos_file /nsm/bro/logs/fluentd/ssl.pos
+  tag bro.ssl
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.ssl>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source ssl
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/tunnel.log
+  pos_file /nsm/bro/logs/fluentd/tunnel.pos
+  tag bro.tunnel
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.tunnel>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc
+  <record>
+    hostname "#{Socket.gethostname}"
+    source tunnel
+    tags nsm
+    category bro
+    customendpoint " "
+    sourceipaddress ${record["id.orig_h"]}
+    sourceport ${record["id.orig_p"]}
+    destinationipaddress ${record["id.resp_h"]}
+    destinationport ${record["id.resp_p"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<source>
+  @type tail
+  path /nsm/bro/logs/current/x509.log
+  pos_file /nsm/bro/logs/fluentd/x509.pos
+  tag bro.x509
+  format json
+  time_key ts
+  keep_time_key true
+</source>
+
+<filter bro.x509>
+  @type record_modifier
+  remove_keys id.orig_h,id.orig_p,id.resp_h,id.resp_p,resp_cc,certificate.version,certificate.subject,certificate.sig_alg,certificate.serial,certificate.not_valid_before,certificate.not_valid_after,certificate.key_type,certificate.key_length,certificate.key_alg,certificate.issuer,certificate.exponent,basic_constraints.ca
+  <record>
+    hostname "#{Socket.gethostname}"
+    source x509
+    tags nsm
+    category bro
+    customendpoint " "
+    certificate.basic_constraintsca ${record["basic_constraints.ca"]}
+    certificate.exponent ${record["certificate.exponent"]}
+    certificateissuer ${record["certificate.issuer"]}
+    certificatekey_alg ${record["certificate.key_alg"]}
+    certificatekey_length ${record["certificate.key_length"]}
+    certificatekey_type ${record["certificate.key_type"]}
+    certificatenot_valid_after ${record["certificate.not_valid_after"]}
+    certificatenot_valid_before ${record["certificate.not_valid_before"]}
+    certificateserial ${record["certificate.serial"]}
+    certificatesigalg ${record["certificate.sig_alg"]}
+    certificatesubject ${record["certificate.subject"]}
+    certificateversion ${record["certificate.version"]}
+    random ${rand(16)}
+  </record>
+</filter>
+
+<match bro.*>
+    @type rewrite_tag_filter
+    rewriterule0 random ^0$ ${tag}.0
+    rewriterule1 random ^1$ ${tag}.1
+    rewriterule2 random ^2$ ${tag}.2
+    rewriterule3 random ^3$ ${tag}.3
+    rewriterule4 random ^4$ ${tag}.4
+    rewriterule5 random ^5$ ${tag}.5
+    rewriterule6 random ^6$ ${tag}.6
+    rewriterule7 random ^7$ ${tag}.7
+    rewriterule8 random ^8$ ${tag}.8
+    rewriterule9 random ^9$ ${tag}.9
+    rewriterule10 random ^10$ ${tag}.10
+    rewriterule11 random ^11$ ${tag}.11
+    rewriterule12 random ^12$ ${tag}.12
+    rewriterule13 random ^13$ ${tag}.13
+    rewriterule14 random ^14$ ${tag}.14
+    rewriterule15 random ^15$ ${tag}.15
+</match>
+
+<match bro.*.0 bro.*.4 bro.*.8 bro.*.12>
+  @type amqp
+#  hosts ["mozdef1.private.scl3.mozilla.com", "mozdef2.private.scl3.mozilla.com", "mozdef3.private.scl3.mozilla.com", "mozdef4.private.scl3.mozilla.com"]
+  hosts ["mozdef1.private.scl3.mozilla.com"]
+  port 5672
+  user mozdef
+  pass {{ mozdefrabbitpass }}
+  key eventtask
+  vhost /
+  content_type application/json
+#  ssl false
+#  tls true
+#  tls_key /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.key
+#  tls_cert /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.crt
+#  tls_ca_certificates /etc/td-agent/testca/cacert.pem
+#  tls_verify_peer false
+</match>
+<match bro.*.1 bro.*.5 bro.*.9 bro.*.13>
+  @type amqp
+#  hosts ["mozdef2.private.scl3.mozilla.com", "mozdef3.private.scl3.mozilla.com", "mozdef4.private.scl3.mozilla.com", "mozdef1.private.scl3.mozilla.com"]
+  hosts ["mozdef2.private.scl3.mozilla.com"]
+  port 5672
+  user mozdef
+  pass {{ mozdefrabbitpass }}
+  key eventtask
+  vhost /
+  content_type application/json
+#  ssl false
+#  tls true
+#  tls_key /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.key
+#  tls_cert /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.crt
+#  tls_ca_certificates /etc/td-agent/testca/cacert.pem
+#  tls_verify_peer false
+</match>
+<match bro.*.2 bro.*.6 bro.*.10 bro.*.14>
+  @type amqp
+#  hosts ["mozdef3.private.scl3.mozilla.com", "mozdef4.private.scl3.mozilla.com", "mozdef1.private.scl3.mozilla.com", "mozdef2.private.scl3.mozilla.com"]
+  hosts ["mozdef3.private.scl3.mozilla.com"]
+  port 5672
+  user mozdef
+  pass {{ mozdefrabbitpass }}
+  key eventtask
+  vhost /
+  content_type application/json
+#  ssl false
+#  tls true
+#  tls_key /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.key
+#  tls_cert /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.crt
+#  tls_ca_certificates /etc/td-agent/testca/cacert.pem
+#  tls_verify_peer false
+</match>
+<match bro.*.3 bro.*.7 bro.*.11 bro.*.15>
+  @type amqp
+#  hosts ["mozdef4.private.scl3.mozilla.com", "mozdef1.private.scl3.mozilla.com", "mozdef2.private.scl3.mozilla.com", "mozdef3.private.scl3.mozilla.com"]
+  hosts ["mozdef4.private.scl3.mozilla.com"]
+  port 5672
+  user mozdef
+  pass {{ mozdefrabbitpass }}
+  key eventtask
+  vhost /
+  content_type application/json
+#  ssl false
+#  tls true
+#  tls_key /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.key
+#  tls_cert /etc/td-agent/client/nsm-stage1.private.scl3.mozilla.com.crt
+#  tls_ca_certificates /etc/td-agent/testca/cacert.pem
+#  tls_verify_peer false
+</match>

@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the NAT instance (with Suricata inside!!)
+    action: cloudformation
+      stack_name="{{ netsecdevbastion_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/bastion.yml"
+    args:
+      template_parameters:
+        SSHKeyName: "{{ SSHKeyName }}"
+        BastionInstanceType: "{{ BastionInstanceType }}"
+        BastionAZ: "{{ BastionAZ }}"
+        NetSecDevDomain: "{{ NetSecDevDomain }}"
+        PublicZoneID: "{{ PublicZoneID }}"
+        PublicZoneDomain: "{{ PublicZoneDomain }}"

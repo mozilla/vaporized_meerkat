@@ -1,0 +1,15 @@
+<source>
+  @type {{ input_type }}
+  path /var/log/nsm/eve.json
+  pos_file {{ pos_file }}
+  tag {{ event_tag }}
+  format json
+  keep_time_key true
+  refresh_interval 5s
+</source>
+
+<match {{ event_tag }}>
+  @type sns
+  sns_topic_name {{ sns_topic_name }}
+  sns_region us-west-2
+</match>

@@ -1,0 +1,79 @@
+---
+# file: tasks/use-apt.yml
+#
+# Configure td-agent from APT repository.
+#
+# @see http://docs.fluentd.org/articles/install-by-deb
+# @see http://toolbelt.treasuredata.com/sh/install-ubuntu-trusty-td-agent2.sh
+#
+
+- name: install apt binaries for Ansible to work
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - python-software-properties
+    - apt-transport-https
+  tags: installfluentpkgs
+
+# One day, when python is fresh enough to handle it on Ubuntu
+#- name: add APT signing key for td-agent
+#  apt_key: 
+#    url: https://packages.treasuredata.com/GPG-KEY-td-agent
+#    state: present
+
+- name: copy new "td-agent.conf" verbatim from main playbook's
+  copy:
+    src:  GPG-KEY-td-agent
+    dest: "{{ tdrepogpgfile }}"
+    owner: root
+    group: root
+    mode: 0400
+  tags: installfluentpkgs
+
+- name: add APT signing key for td-agent
+  apt_key: 
+    file: "{{ tdrepogpgfile }}"
+    state: present
+  tags: installfluentpkgs
+
+- name: add td-agent repository
+  apt_repository: 
+    repo: 'deb https://packages.treasuredata.com/3/{{ ansible_distribution|lower }}/{{ ansible_distribution_release|lower }}/ {{ ansible_distribution_release|lower }} contrib' 
+    state: present
+  tags: installfluentpkgs
+
+- name: install td-agent
+  apt: 
+    name: td-agent
+    update_cache: yes
+    state: present
+  when: tdagent_version is not defined
+  tags: installfluentpkgs
+
+- name: install td-agent
+  apt: 
+    name: "td-agent={{ tdagent_version }}*"
+    update_cache: yes
+    state: present
+  when: tdagent_version is defined
+  tags: installfluentpkgs
+
+- name: install libcurl and make for compiling plugins
+  apt: name={{ item }}  state=present update_cache=yes
+  with_items:
+    - libcurl4-gnutls-dev
+    - build-essential
+  when: tdagent_plugins is defined or tdagent_plugins_versions is defined
+
+#- name: set INIT status and start
+#  service:
+#    name: td-agent
+#    state: started
+#    enabled: yes
+#  when: tdagent_use_service|bool
+
+#- name: set INIT status (SysV style)
+#  shell: update-rc.d td-agent defaults
+#  when: not tdagent_use_service|bool

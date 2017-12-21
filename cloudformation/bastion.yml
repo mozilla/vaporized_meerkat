@@ -1,0 +1,100 @@
+Parameters:
+
+  SSHKeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  BastionInstanceType:
+    Type: String
+    Default: "m4.large"
+    AllowedValues:
+      - "t2.micro"
+      - "m1.small"
+      - "m4.large"
+    Description: Enter t2.micro, m1.small or m4.large. Default is m4.large.
+  BastionAZ:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Default: "us-west-2a"
+  NetSecDevDomain:
+    Description: "The NetSecDev domain name"
+    Type: String
+  PublicZoneID:
+    Description: "Identifier of the public zone the hostname of the bastion host should be placed in"
+    Type: String
+  PublicZoneDomain:
+    Description: "The public zone domain name"
+    Type: String
+
+
+Resources:
+
+  BastionInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - DummyRole
+
+  BastionPubInt:
+    Type: "AWS::EC2::NetworkInterface"
+    Properties:
+      Description: "Bastion instance public int"
+      GroupSet:
+        - !ImportValue Dev-NetSecDev-BastionSG
+      SourceDestCheck: false
+      SubnetId: !ImportValue Dev-NetSecDevVPC-Public-Subnet-ID
+
+  BastionEIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: "vpc"
+
+  BastionEIPAT:
+    Type: "AWS::EC2::EIPAssociation"
+    Properties:
+      AllocationId: !GetAtt BastionEIP.AllocationId
+      NetworkInterfaceId: !Ref BastionPubInt
+
+  BastionVM:
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref BastionInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName: !Ref SSHKeyName
+      Monitoring: true
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          NetworkInterfaceId: !Ref BastionPubInt
+      SourceDestCheck: true
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-bastion"
+      IamInstanceProfile: !Ref BastionInstanceProfile
+
+  BastionDNSPublicRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref PublicZoneID
+      Name: !Join ['', ['bastion1', ., !Ref 'PublicZoneDomain', .]]
+      Type: A
+      TTL: '60'
+      ResourceRecords:
+      - !Ref BastionEIP
+
+  BastionDNSPrivateRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !ImportValue Dev-NetSecDev-HostedZone-ID
+      Name: !Join ['', ['bastion1', ., !Ref 'AWS::Region', ., !Ref 'NetSecDevDomain', .]]
+      Type: A
+      TTL: '60'
+      ResourceRecords:
+      - !GetAtt BastionVM.PrivateIp

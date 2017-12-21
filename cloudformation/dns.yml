@@ -1,0 +1,32 @@
+Parameters:
+
+  VPCRegion:
+    Description: "The VPC region"
+    Type: String
+  NetSecDevDomain:
+    Description: "The NetSecDev domain name"
+    Type: String
+
+Resources:
+
+  NetSecDevDNS: 
+    Type: "AWS::Route53::HostedZone"
+    Properties: 
+      HostedZoneConfig: 
+        Comment: "The hosted zone for the NetSecDev VPC"
+      Name: !Ref NetSecDevDomain
+      VPCs: 
+        - 
+          VPCId: !ImportValue Dev-NetSecDevVPC-ID
+          VPCRegion: !Ref VPCRegion
+
+
+Outputs:
+
+  NetSecDevDNS:
+    Description: NetSecDev Private Hosted Zone
+    Value:
+      Ref: NetSecDevDNS
+    Export:
+      Name: !Sub "Dev-NetSecDev-HostedZone-ID"
+

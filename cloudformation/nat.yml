@@ -1,0 +1,158 @@
+Parameters:
+
+  SSHKeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+  NATInstanceType: 
+    Type: String
+    Default: "m4.large"
+    AllowedValues: 
+      - "t2.micro"
+      - "m1.small"
+      - "m4.large"
+    Description: Enter t2.micro, m1.small or m4.large. Default is m4.large.
+  NatAZ:
+    Type: "List<AWS::EC2::AvailabilityZone::Name>"
+    Default: "us-west-2a"
+  NetSecDevDomain:
+    Type: String
+  SendToMozDef:
+    Type: String
+    Description: The send to mozdef role name
+
+
+Resources:
+
+  NSMInstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - SendToMozDef
+
+  NATSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "NAT instance SG"
+      VpcId: !ImportValue Dev-NetSecDevVPC-ID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        SourceSecurityGroupId: !ImportValue Dev-NetSecDev-BastionSG
+      - IpProtocol: udp
+        FromPort: 53
+        ToPort: 53
+        SourceSecurityGroupId: !ImportValue Dev-NetSecDev-ClientSG
+      - IpProtocol: tcp
+        FromPort: 53
+        ToPort: 53
+        SourceSecurityGroupId: !ImportValue Dev-NetSecDev-ClientSG
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !ImportValue Dev-NetSecDev-ClientSG
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId: !ImportValue Dev-NetSecDev-ClientSG
+
+  NATGWPubInt:
+    Type: "AWS::EC2::NetworkInterface"
+    Properties:
+      Description: "NAT instance public int"
+      GroupSet:
+        - !Ref NATSG
+      SourceDestCheck: false
+      SubnetId: !ImportValue Dev-NetSecDevVPC-Public-Subnet-ID
+
+  NATGWPrivInt:
+    Type: "AWS::EC2::NetworkInterface"
+    Properties:
+      Description: "NAT instance private int"
+      GroupSet:
+        - !Ref NATSG
+      SourceDestCheck: false
+      SubnetId: !ImportValue Dev-NetSecDevVPC-Private-Subnet-ID
+
+  NATEIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: "vpc"
+
+  NATEIPAT:
+    Type: "AWS::EC2::EIPAssociation"
+    Properties:
+      AllocationId: !GetAtt NATEIP.AllocationId
+      NetworkInterfaceId: !Ref NATGWPubInt
+
+  NATGWVM:
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      AvailabilityZone: !Select [ "0", !Ref NatAZ ]
+      ImageId: "ami-114b8471"
+      InstanceInitiatedShutdownBehavior: "stop"
+      InstanceType: !Ref NATInstanceType
+      EbsOptimized: true
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            VolumeType: "io1"
+            Iops: "200"
+            DeleteOnTermination: "true"
+            VolumeSize: "20"
+      KeyName:
+        Ref: SSHKeyName
+      Monitoring: true
+      NetworkInterfaces: 
+        - DeviceIndex: "0"
+          NetworkInterfaceId: !Ref NATGWPubInt
+        - DeviceIndex: "1"
+          NetworkInterfaceId: !Ref NATGWPrivInt
+      Tags:
+        - Key: "Name"
+          Value: "netsecdev-nat"
+      IamInstanceProfile: !Ref NSMInstanceProfile
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |
+            #!/bin/bash
+            export DEBIAN_FRONTEND=noninteractive
+            dpkg-reconfigure debconf -f noninteractive -p critical
+            apt-get -y install software-properties-common
+            apt-add-repository -y ppa:ansible/ansible
+            apt-get update
+            apt-get -y dist-upgrade
+            apt-get -y install git ansible awscli python-boto python-boto3 virtualenv
+            virtualenv /root/credstash
+            export PATH="/root/credstash/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+            export VIRTUAL_ENV="/root/credstash"
+            /root/credstash/bin/pip install credstash
+            credstash -r us-west-2 get netsecdev:vaultpassword app=netsecdev > /dev/shm/ansible_vault_password.txt
+            aws s3 cp s3://suricatapackages/suricata.tar .
+            tar xf suricata.tar
+            HOME=/root ansible-playbook suricata.yml
+
+  PublicToIGWRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !ImportValue Dev-NetSecDevVPC-PublicRT-ID
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !ImportValue Dev-NetSecDev-IGW-ID
+
+  PrivateToPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !ImportValue Dev-NetSecDevVPC-PrivateRT-ID
+      DestinationCidrBlock: "0.0.0.0/0"
+      NetworkInterfaceId: !Ref NATGWPrivInt
+
+  NATDNSPrivateRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !ImportValue Dev-NetSecDev-HostedZone-ID
+      Name: !Join ['', ['nat1', ., !Ref 'AWS::Region', ., !Ref 'NetSecDevDomain', .]]
+      Type: A
+      TTL: '60'
+      ResourceRecords:
+      - !GetAtt NATGWVM.PrivateIp

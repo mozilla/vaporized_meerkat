@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the hosted zone
+    action: cloudformation
+      stack_name="{{ dns_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/dns.yml"
+    args:
+      template_parameters:
+        VPCRegion: "{{ region }}"
+        NetSecDevDomain: "{{ NetSecDevDomain }}"

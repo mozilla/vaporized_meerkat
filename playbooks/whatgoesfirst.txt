@@ -1,0 +1,8 @@
+sqs
+sns
+sendtomozdefrole
+vpc
+dns
+bastion
+nat
+ec2clients

@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - "../vars/vars-{{ env }}.yml"
+
+  tasks:
+  - name: Create the global SQS for the NSM data collection
+    action: cloudformation
+      stack_name="{{ sqs_stack_name }}"
+      state="{{ state }}"
+      region="{{ region }}"
+      template="../cloudformation/sqs.yml"
+    args:
+      template_parameters:
+        NSMSQSName: "{{ NSMSQSName }}"
+        NSMSQSARN: "{{ NSMSQSARN }}"
+        NSMSQSURL: "{{ NSMSQSURL }}"
+        MozDefARN: "{{ MozDefARN }}"
+

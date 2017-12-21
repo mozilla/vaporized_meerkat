@@ -1,0 +1,21 @@
+---
+tdagent_plugins:
+  - fluent-plugin-record-modifier # for transformation of event data into something useful
+  - fluent-plugin-multi-format-parser # for multiple formats 
+  - fluent-plugin-sns # for aws accounts outside of infosec
+
+input_type: tail
+pos_file: /var/log/nsm/td-agent.pos
+refresh_rate: 5s
+filter_type: record_modifier
+event_tag: netsecdev
+topic_name: "{{ SNSTopicName }}"
+output_type: sns
+sns_topic_name: nsmsns
+sns_endpoint: sns.us-west-2.amazonaws.com
+
+tdagent_conf_template: roles/fluentd/templates/td-agent.conf.j2
+
+tdagent_use_service:       True      # use "service" command to start/restart fluentd?
+
+tdrepogpgfile: "/tmp/GPG-KEY-td-agent"
